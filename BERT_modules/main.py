@@ -1,22 +1,25 @@
 from PromptORE import pipeline_PromptORE
-import argparse
-import os
+import click
 
-parser = argparse.ArgumentParser(description="Runs the complete pipeline for generating prompts, extracting BERT embeddings,\
-        and performing clustering using the PromptORE approach.")
+@click.command()
+@click.option("--xml_file", help="Path to the input XML file", required=True)
+@click.option("--models_path", help="Path to the models directory", required=True)
+@click.option("--output_dir", help="Path to the models output directory for CSV files", required=True)
+@click.option("--batch_size", type=int, default=32, help="number of sentences per batch")
+@click.option("--entity_number", type=int, default=10, help="number of entities to extract with the method")
+def main(xml_file, models_path, output_dir, batch_size, entity_number):
+    pipeline = pipeline_PromptORE()
 
-parser.add_argument("--xml_file", help="Path to the input XML file", required=True)
-parser.add_argument("--models_path", help="Path to the models directory", required=True)
-parser.add_argument("--output_dir", help="Path to the models output directory for CSV files", required=True)
-parser.add_argument("--batch_size", type=int, default=32, help="number of sentences per batch")
-parser.add_argument("--entity_number", type=int, default=10, help="number of entities to extract with the method")
+    pipeline.run_models(
+        xml_input=xml_file,
+        models_path=models_path,
+        output_folder=output_dir,
+        batch_size=batch_size,
+        entity_number=entity_number
+    )
 
-args = parser.parse_args()
-
-xml_file = args.xml_file
-models_path = args.models_path
-output_dir = args.output_dir 
-batch_size =  args.batch_size
+if __name__ == "__main__":
+    main()
 entity_number = args.entity_number
 
 # Check if the XML file exists
@@ -30,6 +33,10 @@ pipeline.run_models(
     xml_input=xml_file,
     models_path=models_path,
     output_folder=output_dir,
+    batch_size=batch_size,
+    entity_number=entity_number
+)
+
     batch_size=batch_size,
     entity_number=entity_number
 )
