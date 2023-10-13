@@ -5,13 +5,13 @@ from Ro_auxiliary_function_XML_process import entity_sort_dictionary, counter
 
 
 def phrase_extraction(
-        xml_path: str,
-        return_dict: bool = True,
-        ns:str =None,
-        parragraph_objetives:str = None,
-        entity_objetives:str = None,
-        count:bool = False
-        )-> dict:
+    xml_path: str,
+    return_dict: bool = True,
+    ns: str = None,
+    parragraph_objetives: str = None,
+    entity_objetives: str = None,
+    count: bool = False
+) -> dict:
     '''
     DESCRIPTION: 
     This function extracts the full text of a XML-TEI file 
@@ -36,17 +36,17 @@ def phrase_extraction(
         ["{http://www.tei-c.org/ns/1.0}persName",
         "{http://www.tei-c.org/ns/1.0}orgName",
         "{http://www.tei-c.org/ns/1.0}placeName",
-        '{http://www.tei-c.org/ns/1.0}date']
+        "{http://www.tei-c.org/ns/1.0}date",
+        "{http://www.tei-c.org/ns/1.0}rs",
+        "{http://www.tei-c.org/ns/1.0}fw"  # Include fw element
+        ]
 
         count: 
         optional parameter that returns a numerical dictionary for the keys.
         default: False
-    
+
     OUTPUTS: dictionary with keys for the number of entities and the list of phrases attached.
     '''
-
-
-
 
     tree = ET.parse(xml_path)
     root = tree.getroot()
@@ -55,28 +55,33 @@ def phrase_extraction(
 
     parragraph_objetives = ['{http://www.tei-c.org/ns/1.0}pb', '{http://www.tei-c.org/ns/1.0}p']
 
-    entity_objetives = ["{http://www.tei-c.org/ns/1.0}persName",
-                        "{http://www.tei-c.org/ns/1.0}orgName",
-                        "{http://www.tei-c.org/ns/1.0}placeName",
-                        "{http://www.tei-c.org/ns/1.0}date",
-                        "{http://www.tei-c.org/ns/1.0}rs"]
-    
+    entity_objetives = [
+        "{http://www.tei-c.org/ns/1.0}persName",
+        "{http://www.tei-c.org/ns/1.0}orgName",
+        "{http://www.tei-c.org/ns/1.0}placeName",
+        "{http://www.tei-c.org/ns/1.0}date",
+        "{http://www.tei-c.org/ns/1.0}rs",
+        "{http://www.tei-c.org/ns/1.0}fw"  # Include fw element
+    ]
+
     result = ''
-    
+
     for div in root.xpath('//tei:div', namespaces=ns):
         for element in div:
             if element.tag in parragraph_objetives and element.text is not None:
-                paragraph_entities = [
-                                    (div.text or '') + ' ' + 
-                                    ('$' + re.sub(r'\s+', ' ', entity.text) + '$' if entity.tag !=
-                                    '{http://www.tei-c.org/ns/1.0}date' else entity.text) + ' ' +
-                                    (entity.tail or '')+ ' ' + (div.tail or '')
-                                    for entity in element if entity.tag in
-                                    entity_objetives and entity.text is not None
-                                    ]
-                paragraph_text = element.text + ' '.join(paragraph_entities)
-                result += paragraph_text + (element.tail or "")
-    
+                # Include all text content within the <p> element
+                paragraph_text = element.text
+                for entity in element:
+                    if entity.tag in entity_objetives and entity.text is not None:
+                        # Include entity tags as well
+                        paragraph_text += ' $' + re.sub(r'\s+', ' ', entity.text) + '$ '
+                    if entity.tail is not None:
+                        # Include tail text of entities
+                        paragraph_text += entity.tail
+                paragraph_text += (element.tail or '')
+
+                result += paragraph_text  # Add the entire text
+
     result = ' '.join(result.split())
     result = re.sub(r'\s+\-', '', result)
     result = re.sub(r'[\[\]\(\)]', '', result)
@@ -96,7 +101,6 @@ def phrase_extraction(
     else:
         result_list = [i + '.' if not i.endswith(':') else i for i in result_list]
         return result_list
-
 
 
 
