@@ -1,6 +1,6 @@
-# Spanish_PromptORE
+# Adapting PromptORE for Modern History: Information Extraction from Hispanic Monarchy Documents of the XVIth Century
 
-This repository offers an implementation of the paper PromptORE - A Novel Approach Towards Fully Unsupervised Relation Extraction.
+This repository offers an implementation of the paper Adapting PromptORE for Modern History: Information Extraction from Hispanic Monarchy Documents of the XVIth Century.
 
 Here we present a class based on transformers and torch to perform the full experiment of the paper based on. It was adapted to spanish text as well as XML-TIE inputs. The class will yield a dataframe with the relations extracted without supervision. It is though to being executed over a sample (small to facilitated the labelling) and then classify manually. Another option is to use the prompt_type desired and execute the k-means clustering over one of the prompts.
 
